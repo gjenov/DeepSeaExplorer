@@ -107,7 +107,7 @@
                                    if (SUCCESS != iRetVal) \
                                      return  iRetVal;}
 
-#define SPI_IF_BIT_RATE  1000000
+#define SPI_IF_BIT_RATE  10000000
 #define TR_BUFF_SIZE     100
 
 //*****************************************************************************
@@ -578,9 +578,42 @@ static unsigned char clown_2[] = {
 typedef struct {
     int x, y;
     int active;
+    int speed;
+    uint16_t color;
 } Projectile;
 
 Projectile projectiles[MAX_PROJECTILES];
+
+typedef struct {
+    int x, y;
+    int active;
+} Seaweed;
+
+Seaweed seaweed[2];
+
+#define MAX_BUBBLES 100
+
+typedef struct {
+    int x, y;
+    int speed;
+    int active;
+} Bubble;
+
+Bubble bubbles[MAX_BUBBLES];
+
+void spawnBubble(int current_x, int current_y) {
+    int i = 0;
+    for (i = 0; i < MAX_BUBBLES; i++) {
+        if (!bubbles[i].active) {
+            bubbles[i].x = current_x + 16;     // Centered below avatar
+            bubbles[i].y = current_y + 8;    // Just below player
+            bubbles[i].speed = 5;
+            bubbles[i].active = 1;
+            break;
+        }
+    }
+}
+
 
 void main()
 {
@@ -629,6 +662,13 @@ void main()
         for (i = 0; i < MAX_PROJECTILES; i++) {
             projectiles[i].active = 0;
         }
+        for (i = 0; i < 2; i++) {
+            seaweed[i].active = 0;
+        }
+        for (i = 0; i < MAX_BUBBLES; i++) {
+            bubbles[i].active = 0;
+        }
+
 
 //        printAllFonts();
 //        MAP_UtilsDelay(16000000);
@@ -648,12 +688,15 @@ void main()
     static const uint16_t colors[] = {
         WHITE
     };
+    static const uint16_t fish_colors[] = {
+        ORANGE,CYAN,RED,GREEN
+    };
     //int color_idx = rand() % 1;
     unsigned int enemy_color = WHITE;
     drawCircle(enemy_y,enemy_x, 4, enemy_color);
     int counter = 0;
     char conv_buf[12];
-    int game_speed = 16000;
+    int game_speed = 160000;
     int timer_speed = 100;
     int TTL = 10;
     int TTL_counter = 0;
@@ -661,15 +704,86 @@ void main()
     setCursor(100,100);
     sprintf(conv_buf, "%d", TTL);
     Outstr(conv_buf);
+    int drawCheck = 0;
+
+    int last_x = current_x;
+    int last_y = current_y;
+
     while(FOREVER)
     {
+        //shiftBackgroundDown();
+        if (current_x != last_x || current_y != last_y) {
+            spawnBubble(current_x, current_y);  // Spawn one bubble per move
+            last_x = current_x;
+            last_y = current_y;
+        }
+        if(drawCheck > 5){
+            drawCircle(enemy_y,enemy_x, 4, BLUE);
+            drawCircle(enemy_y,enemy_x, 4, enemy_color);
+            drawCheck = 0;
+            fillRect(10, 10, 20, 10, BLUE);
+            setCursor(10,10);
+            sprintf(conv_buf, "%d", counter);
+            Outstr(conv_buf);
+            fillRect(100, 100, 12, 10, BLUE);
+            setCursor(100,100);
+            sprintf(conv_buf, "%d", TTL);
+            Outstr(conv_buf);
+        }
+        drawCheck++;
         //projectiles
+
+        for (i = 0; i < MAX_BUBBLES; i++) {
+            if (bubbles[i].active) {
+                // Erase previous
+                drawPixel(bubbles[i].y + 6, bubbles[i].x + 6, BLUE);
+                drawPixel(bubbles[i].y - 6, bubbles[i].x - 6, BLUE);
+                drawPixel(bubbles[i].y - 6, bubbles[i].x + 6, BLUE);
+                drawPixel(bubbles[i].y + 6, bubbles[i].x - 6, BLUE);
+                drawPixel(bubbles[i].y + 6, bubbles[i].x + 12, BLUE);
+                drawPixel(bubbles[i].y - 5, bubbles[i].x - 6, BLUE);
+                drawPixel(bubbles[i].y - 2, bubbles[i].x + 3, BLUE);
+                drawPixel(bubbles[i].y + 12, bubbles[i].x - 10, BLUE);
+
+                // Update position
+                bubbles[i].x += bubbles[i].speed;
+
+                // Deactivate if off-screen
+                if (bubbles[i].x - 2 > 127) {
+                    bubbles[i].active = 0;
+                } else {
+                    // Draw new position
+                    drawPixel(bubbles[i].y + 6, bubbles[i].x + 6, WHITE);
+                    drawPixel(bubbles[i].y - 6, bubbles[i].x - 6, WHITE);
+                    drawPixel(bubbles[i].y - 6, bubbles[i].x + 6, WHITE);
+                    drawPixel(bubbles[i].y + 6, bubbles[i].x - 6, WHITE);
+                    drawPixel(bubbles[i].y + 6, bubbles[i].x + 12, WHITE);
+                    drawPixel(bubbles[i].y - 5, bubbles[i].x - 6, WHITE);
+                    drawPixel(bubbles[i].y - 2, bubbles[i].x + 3, WHITE);
+                    drawPixel(bubbles[i].y + 12, bubbles[i].x - 10, WHITE);
+                }
+            }
+        }
+
+
 
         for (i = 0; i < MAX_PROJECTILES; i++) {
             if (!projectiles[i].active) {
                 projectiles[i].x = 0;
                 projectiles[i].y = rand() % 120;
                 projectiles[i].active = 1;
+                projectiles[i].speed = (rand() % 1) + 2;
+                int random_color = rand() % 4;
+                projectiles[i].color = fish_colors[random_color];
+                break;  // Only spawn one per cycle
+            }
+        }
+        //seaweed
+        for (i = 0; i < 2; i++) {
+            if (!seaweed[i].active) {
+                seaweed[i].x = 0;
+                seaweed[i].y = rand() % 120;
+                seaweed[i].active = 1;
                 break;  // Only spawn one per cycle
             }
         }
@@ -682,7 +796,7 @@ void main()
                 //fillCircle(projectiles[i].y, projectiles[i].x, 2, BLUE);  // Ensure fill too
 
                 // Move down
-                projectiles[i].x += 2;
+                projectiles[i].x += projectiles[i].speed;
 
                 // Check collision with player (doomGuy: 16x16)
                 if(abs((current_x + 8) - projectiles[i].x) <= 12 && abs((current_y+8) - projectiles[i].y) <= 12){
@@ -714,12 +828,40 @@ void main()
                 } else {
                     // Draw red circle
                     // Erase previous circle
+
                     drawBitmap(projectiles[i].y, projectiles[i].x, clown_1, 8, 8, BLACK, BLUE, 0);
-                    drawBitmap(projectiles[i].y, projectiles[i].x, clown_2, 8, 8, ORANGE, BLUE, 0);//orange 0xFD20
+                    drawBitmap(projectiles[i].y, projectiles[i].x, clown_2, 8, 8, projectiles[i].color, BLUE, 0);//orange 0xFD20
                     //drawBitmap(projectiles[i].y, projectiles[i].x, clown_3, 8, 8, WHITE, BLUE, 0);
                 }
             }
         }
+
+        for (i = 0; i < 2; i++) {
+                    if (seaweed[i].active) {
+
+
+                        fillRect(seaweed[i].y, seaweed[i].x, 8, 8, BLUE);
+                        //drawCircle(projectiles[i].y, projectiles[i].x, 2, BLUE);
+                        //fillCircle(projectiles[i].y, projectiles[i].x, 2, BLUE);  // Ensure fill too
+
+                        // Move down
+                        seaweed[i].x += 1;
+
+
+
+                        // Deactivate if out of screen
+                        if (seaweed[i].x - 2 > 128) {
+                            seaweed[i].active = 0;
+                        } else {
+                            // Draw red circle
+                            // Erase previous circle
+
+                            drawBitmap(seaweed[i].y, seaweed[i].x, clown_1, 8, 8, GREEN, BLUE, 0);
+                            drawBitmap(seaweed[i].y, seaweed[i].x, clown_2, 8, 8, GREEN, BLUE, 0);//orange 0xFD20
+                            //drawBitmap(projectiles[i].y, projectiles[i].x, clown_3, 8, 8, WHITE, BLUE, 0);
+                        }
+                    }
+                }
 
 
 

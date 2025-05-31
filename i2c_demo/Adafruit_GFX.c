@@ -35,6 +35,11 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "Adafruit_SSD1351.h"
 #include "glcdfont.h"
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdint.h>
+
 //#define pgm_read_byte(addr) (*(const unsigned char *)(addr))
 
 int cursor_x=0;
@@ -58,8 +63,29 @@ Adafruit_GFX(int w, int h):
   wrap      = true;
 }
 */
+// Color definitions
+#define BLACK           0x0000
+#define BLUE            0x001F
+#define GREEN           0x07E0
+#define CYAN            0x07FF
+#define RED             0xF800
+#define MAGENTA         0xF81F
+#define YELLOW          0xFFE0
+#define WHITE           0xFFFF
+#define ORANGE          0xFD20
 
+void shiftBackgroundDown() {
+    // Shift screen contents (not really possible on OLED, so fake it)
+    fillRect(0, 0, 128, 127, BLUE); // Shift everything up by redrawing
 
+    int i = 0;
+    // Draw a new row at the bottom
+    for (i = 0; i < 128; i++) {
+        if (rand() % 20 == 0) {
+            drawPixel(i, 127, YELLOW); // Sand
+        }
+    }
+}
 
 void drawBitmap(int x, int y, const unsigned char *bitmap, int width, int height,
                 int color, int bg_color, int draw_bg) {
