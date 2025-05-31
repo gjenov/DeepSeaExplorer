@@ -1471,7 +1471,7 @@ void main() {
                         setCursor(0,120);
 
                         //UART_PRINT("String: %s \n\r", (char*)UserMessage);
-                        UserMessage[MessageIndex + 1] = '\0';
+                        //UserMessage[MessageIndex + 1] = '\0';
 
                         //UARTSendString(UARTA1_BASE, (const char*)UserMessage);
 
@@ -1785,6 +1785,14 @@ void main() {
     }
     MAP_IntMasterEnable();
     fillScreen(BLUE);
+
+    char temp[20];  // Temporary buffer to hold int as string
+    sprintf(temp, " %d", counter);  // Convert int to string
+    size_t len = strlen((const char *)UserMessage);
+    strncat((char *)UserMessage, temp, sizeof(UserMessage) - len - 1);
+
+
+    //UserMessage[MessageIndex + 1] = '\0';
 
    InitTerm();
    ClearTerm();
