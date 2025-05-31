@@ -584,35 +584,6 @@ typedef struct {
 
 Projectile projectiles[MAX_PROJECTILES];
 
-typedef struct {
-    int x, y;
-    int active;
-} Seaweed;
-
-Seaweed seaweed[2];
-
-#define MAX_BUBBLES 100
-
-typedef struct {
-    int x, y;
-    int speed;
-    int active;
-} Bubble;
-
-Bubble bubbles[MAX_BUBBLES];
-
-void spawnBubble(int current_x, int current_y) {
-    int i = 0;
-    for (i = 0; i < MAX_BUBBLES; i++) {
-        if (!bubbles[i].active) {
-            bubbles[i].x = current_x + 16;     // Centered below avatar
-            bubbles[i].y = current_y + 8;    // Just below player
-            bubbles[i].speed = 5;
-            bubbles[i].active = 1;
-            break;
-        }
-    }
-}
 
 
 void main()
@@ -662,12 +633,7 @@ void main()
         for (i = 0; i < MAX_PROJECTILES; i++) {
             projectiles[i].active = 0;
         }
-        for (i = 0; i < 2; i++) {
-            seaweed[i].active = 0;
-        }
-        for (i = 0; i < MAX_BUBBLES; i++) {
-            bubbles[i].active = 0;
-        }
+
 
 
 //        printAllFonts();
@@ -711,12 +677,7 @@ void main()
 
     while(FOREVER)
     {
-        //shiftBackgroundDown();
-        if (current_x != last_x || current_y != last_y) {
-            spawnBubble(current_x, current_y);  // Spawn one bubble per move
-            last_x = current_x;
-            last_y = current_y;
-        }
+
         if(drawCheck > 5){
             drawCircle(enemy_y,enemy_x, 4, BLUE);
             drawCircle(enemy_y,enemy_x, 4, enemy_color);
@@ -733,38 +694,6 @@ void main()
         drawCheck++;
         //projectiles
 
-        for (i = 0; i < MAX_BUBBLES; i++) {
-            if (bubbles[i].active) {
-                // Erase previous
-                drawPixel(bubbles[i].y + 6, bubbles[i].x + 6, BLUE);
-                drawPixel(bubbles[i].y - 6, bubbles[i].x - 6, BLUE);
-                drawPixel(bubbles[i].y - 6, bubbles[i].x + 6, BLUE);
-                drawPixel(bubbles[i].y + 6, bubbles[i].x - 6, BLUE);
-                drawPixel(bubbles[i].y + 6, bubbles[i].x + 12, BLUE);
-                drawPixel(bubbles[i].y - 5, bubbles[i].x - 6, BLUE);
-                drawPixel(bubbles[i].y - 2, bubbles[i].x + 3, BLUE);
-                drawPixel(bubbles[i].y + 12, bubbles[i].x - 10, BLUE);
-
-                // Update position
-                bubbles[i].x += bubbles[i].speed;
-
-                // Deactivate if off-screen
-                if (bubbles[i].x - 2 > 127) {
-                    bubbles[i].active = 0;
-                } else {
-                    // Draw new position
-                    drawPixel(bubbles[i].y + 6, bubbles[i].x + 6, WHITE);
-                    drawPixel(bubbles[i].y - 6, bubbles[i].x - 6, WHITE);
-                    drawPixel(bubbles[i].y - 6, bubbles[i].x + 6, WHITE);
-                    drawPixel(bubbles[i].y + 6, bubbles[i].x - 6, WHITE);
-                    drawPixel(bubbles[i].y + 6, bubbles[i].x + 12, WHITE);
-                    drawPixel(bubbles[i].y - 5, bubbles[i].x - 6, WHITE);
-                    drawPixel(bubbles[i].y - 2, bubbles[i].x + 3, WHITE);
-                    drawPixel(bubbles[i].y + 12, bubbles[i].x - 10, WHITE);
-                }
-            }
-        }
-
 
 
         for (i = 0; i < MAX_PROJECTILES; i++) {
@@ -778,15 +707,7 @@ void main()
                 break;  // Only spawn one per cycle
             }
         }
-        //seaweed
-        for (i = 0; i < 2; i++) {
-            if (!seaweed[i].active) {
-                seaweed[i].x = 0;
-                seaweed[i].y = rand() % 120;
-                seaweed[i].active = 1;
-                break;  // Only spawn one per cycle
-            }
-        }
+
         for (i = 0; i < MAX_PROJECTILES; i++) {
             if (projectiles[i].active) {
 
@@ -836,32 +757,6 @@ void main()
             }
         }
 
-        for (i = 0; i < 2; i++) {
-                    if (seaweed[i].active) {
-
-
-                        fillRect(seaweed[i].y, seaweed[i].x, 8, 8, BLUE);
-                        //drawCircle(projectiles[i].y, projectiles[i].x, 2, BLUE);
-                        //fillCircle(projectiles[i].y, projectiles[i].x, 2, BLUE);  // Ensure fill too
-
-                        // Move down
-                        seaweed[i].x += 1;
-
-
-
-                        // Deactivate if out of screen
-                        if (seaweed[i].x - 2 > 128) {
-                            seaweed[i].active = 0;
-                        } else {
-                            // Draw red circle
-                            // Erase previous circle
-
-                            drawBitmap(seaweed[i].y, seaweed[i].x, clown_1, 8, 8, GREEN, BLUE, 0);
-                            drawBitmap(seaweed[i].y, seaweed[i].x, clown_2, 8, 8, GREEN, BLUE, 0);//orange 0xFD20
-                            //drawBitmap(projectiles[i].y, projectiles[i].x, clown_3, 8, 8, WHITE, BLUE, 0);
-                        }
-                    }
-                }
 
 
 
