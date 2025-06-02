@@ -1949,6 +1949,7 @@ void main() {
         }
 
     }
+    delay(50);
     MAP_IntMasterEnable();
     fillScreen(BLUE);
 
