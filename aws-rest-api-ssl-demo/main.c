@@ -1325,6 +1325,7 @@ Projectile projectiles[MAX_PROJECTILES];
 
 
 
+
 void main() {
     int x = 8;
     int y = 63;
@@ -1372,27 +1373,32 @@ void main() {
     setArray3();
     setArray4();
 
-    fillScreen(BLACK);
-    setCursor(8,0);
-    Outstr("Sent: ");
-    setCursor(8,40);
-    Outstr("Received: ");
+
+    //intro screen
+    fillScreen(BLUE);
+    setCursor(16,56);
+    Outstr("Deep Sea Explorer");
+    setCursor(16,64);
+    Outstr("By Asad and George");
+    delay(30);
+    fillScreen(BLUE);
+
+
+    //drawBitmap(0, 0, diver_body_bits, 128, 128, 0x4208  , BLUE, 1);
+    //drawBitmap(0, 0, diver_blue_bits, 128, 128, BLUE  , 0, 0);
+    //drawBitmap(0, 0, diver_body_black_outline_bits, 128, 128, 0x4208, 0, 0);
+    //drawBitmap(0, 0, diver_body_yellow_bits, 128, 128, YELLOW , 0, 0);
+
+    //delay(100);
+    //fillScreen(BLUE);
 
 
 
-
+//enter username
+    setCursor(0,8);
+    Outstr("Enter Your Name:");
     while(1){
-            // Check Uart
-            if(MAP_UARTCharsAvail(UARTA1_BASE)){
-                fillRoundRect(0, 16, 128, 16, 0, BLACK);
-                setCursor(0,16);
 
-                //store in buffer
-                char ReceivedMessage[128];
-                UARTReceiveString(UARTA1_BASE, ReceivedMessage, sizeof(ReceivedMessage));
-
-                Outstr(ReceivedMessage);
-            }
             if(g_pulseDetected){
                 MAP_IntMasterDisable();
                 g_pulseDetected = false;
@@ -1457,7 +1463,7 @@ void main() {
                     }
 
                     setCursor(x,y);
-                    fillRoundRect(x - 2, y - 2, 10, 10, 0, BLACK);
+                    fillRoundRect(x - 2, y - 2, 10, 10, 0, BLUE);
                     Outstr(letterConversion(TvCode));
                     //new signal, reset timer
                     newSignal = 1;
@@ -1467,7 +1473,7 @@ void main() {
                     //send "MUTE"
                     if(BinaryToInt(TvCode) == 134){
                         //UART_PRINT("Mute \n\r");
-                        fillRoundRect(0, 120, 128, 16, 0, BLACK);
+                        fillRoundRect(0, 120, 128, 16, 0, BLUE);
                         setCursor(0,120);
 
                         //UART_PRINT("String: %s \n\r", (char*)UserMessage);
@@ -1518,7 +1524,7 @@ void main() {
                     else if(BinaryToInt(TvCode) == 2){
                         //UART_PRINT("1");
 
-                        fillRoundRect(0, 16, 128, 16, 0, BLACK);
+                        fillRoundRect(0, 16, 128, 16, 0, BLUE);
                     }
 
 
@@ -1548,6 +1554,164 @@ void main() {
             }
         }
 
+    fillScreen(BLUE);
+    setCursor(0,8);
+    Outstr("Choose Your Diver!");
+
+
+    drawBitmap(16 + 16, 56, body, 16, 16, BLACK, BLUE, 0);
+    drawBitmap(16 + 16, 56, mask, 16, 16, CYAN, BLUE, 0);
+    drawBitmap(16 + 16, 56, armor, 16, 16, 0xFFF0, BLUE, 0);
+
+    setCursor(36, 76);
+    Outstr("1");
+
+    drawBitmap(40+ 16, 56, body, 16, 16, GREEN, BLUE, 0);
+    drawBitmap(40+ 16, 56, mask, 16, 16, RED, BLUE, 0);
+    drawBitmap(40+ 16, 56, armor, 16, 16, MAGENTA, BLUE, 0);
+
+    setCursor(62, 76);
+    Outstr("2");
+
+    drawBitmap(64+ 16, 56, body, 16, 16, 0x7E0F , BLUE, 0);
+    drawBitmap(64+ 16, 56, mask, 16, 16, 0xFBE0, BLUE, 0);
+    drawBitmap(64+ 16, 56, armor, 16, 16, 0x780F, BLUE, 0);
+
+    setCursor(86, 76);
+    Outstr("3");
+
+
+    unsigned int body_color;
+    unsigned int mask_color;
+    unsigned int armor_color;
+    //choose character
+    while(1){
+            // Check Uart
+
+            if(g_pulseDetected){
+                MAP_IntMasterDisable();
+                g_pulseDetected = false;
+                MAP_IntMasterEnable();
+                if(!StartPulse && g_pulseWidth > 50000){
+                    StartPulse = true;
+                    bits = 0;
+                    TvCode = 0;
+                    continue;
+                }
+                if(g_timerTicks - startTimeWatch > 1000000 && (newSignal == 1)){
+                    newSignal = 0;
+                    startTimeWatch = g_timerTicks;
+                    x += 8;
+                    screenidx += 1;
+                    setCursor(x,y);
+
+
+
+                }
+
+                if(StartPulse && bits < 23){
+                    if(((g_highPulseDuration > 400 && g_highPulseDuration < 450))){
+                        TvCode = (TvCode << 1) | 0;
+                        bits++;
+                        TvCode = (TvCode << 1) | 0;
+                        bits++;
+                    }
+                    else if ((g_lowPulseDuration > 450 && g_lowPulseDuration < 480)){
+                        TvCode = (TvCode << 1) | 1;
+                        bits++;
+                        TvCode = (TvCode << 1) | 0;
+                        bits++;
+                    }
+                    else if ((g_highPulseDuration > 480 && g_highPulseDuration < 1000)){
+                        TvCode = (TvCode << 1) | 0;
+                        bits++;
+                        TvCode = (TvCode << 1) | 1;
+                        bits++;
+                    }
+                    else if ((g_lowPulseDuration > 480 && g_lowPulseDuration < 1000)){
+                        TvCode = (TvCode << 1) | 1;
+                        bits++;
+                        TvCode = (TvCode << 1) | 1;
+                        bits++;
+                    }
+                }
+
+
+                if(bits >= 23 && convertToInt(TvCode)){
+                    // If we're waiting more than a second move on to the next chunk
+
+
+                    PrintBinaryToUART(TvCode);
+
+
+                    letterConversion(TvCode);
+                    //new signal, reset timer
+                    newSignal = 1;
+                    startTimeWatch = g_timerTicks;
+
+
+
+
+                    // Clear the top text by pressing 1 on the remote
+                    if(BinaryToInt(TvCode) == 2){
+                        //UART_PRINT("1");
+
+                        //fillRoundRect(0, 16, 128, 16, 0, GREEN);
+                        body_color = BLACK;
+                        mask_color = CYAN;
+                        armor_color = 0xFFF0;
+                        break;
+                    }
+                    //2
+                    else if(BinaryToInt(TvCode) == 11){
+                        //UART_PRINT("1");
+
+
+                        body_color = GREEN;
+                        mask_color = RED;
+                        armor_color = MAGENTA;
+                        break;
+                    }
+                    //3
+
+                    else if(BinaryToInt(TvCode) == 8){
+                        //UART_PRINT("1");
+
+                        body_color = 0x7E0F;
+                        mask_color = 0xFBE0;
+                        armor_color = 0x780F;
+                        break;
+                    }
+
+
+                    StartPulse = false;
+                    bits = 0;
+                    g_highPulseDuration = 0;
+                    g_lowPulseDuration = 0;
+                    TvCode = 0;
+
+                    g_pulseDetected = false;
+
+
+                    //BackSpaced = false;
+                }
+                else if(bits >= 24){
+                    StartPulse = false;
+                    bits = 0;
+                    g_highPulseDuration = 0;
+                    g_lowPulseDuration = 0;
+                    TvCode = 0;
+                    g_pulseDetected = false;
+                }
+
+                MAP_IntMasterDisable();
+                g_pulseDetected = false;
+                MAP_IntMasterEnable();
+            }
+        }
+
+    delay(2);
+
    MAP_IntMasterDisable();
    g_pulseDetected = false;
 
@@ -1563,6 +1727,7 @@ void main() {
     current_x = 63;
     current_y = 63;
     unsigned int current_color = WHITE;
+
 
     int enemy_x = rand() % 120;
     int enemy_y = rand() % 120;
@@ -1695,7 +1860,7 @@ void main() {
         //setCursor(current_y, current_x);
         fillRect(current_y, current_x, 16, 16, BLUE);
 
-        current_x = current_x + x_acc;
+        current_x = current_x + x_acc + 3;
         current_y = current_y + y_acc;
 
         if (current_x > 124){
@@ -1756,9 +1921,10 @@ void main() {
 
         //drawBitmap(int x, int y, const unsigned char *bitmap, int width, int height, int color, int bg_color, int draw_bg);
         //drawBitmap(current_y, current_x, doomGuy, 16, 16, BLUE, BLUE, 0);
-        drawBitmap(current_y, current_x, body, 16, 16, BLACK, BLUE, 0);
-        drawBitmap(current_y, current_x, mask, 16, 16, CYAN, BLUE, 0);
-        drawBitmap(current_y, current_x, armor, 16, 16, 0xFFF0, BLUE, 0);
+        //black cyan 0xFFF0
+        drawBitmap(current_y, current_x, body, 16, 16, body_color, BLUE, 0);
+        drawBitmap(current_y, current_x, mask, 16, 16, mask_color, BLUE, 0);
+        drawBitmap(current_y, current_x, armor, 16, 16, armor_color, BLUE, 0);
         //drawCircle(current_y,current_x, 4, current_color);
         MAP_UtilsDelay(game_speed);
         TTL_counter++;
