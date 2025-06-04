@@ -1359,7 +1359,7 @@ void main() {
 
     Adafruit_Init();
 
-    InitUART1();
+    //InitUART1();
 
     ClockInit();
 
@@ -1951,7 +1951,7 @@ void main() {
     }
     delay(50);
     MAP_IntMasterEnable();
-    fillScreen(BLUE);
+    //fillScreen(BLUE);
 
     char temp[20];  // Temporary buffer to hold int as string
     sprintf(temp, " %d", counter);  // Convert int to string
@@ -1989,6 +1989,8 @@ void main() {
     }
     //Connect to the website with TLS encryption
     fillScreen(GREEN);
+    setCursor(16, 76);
+    Outstr("Score Uploaded!");
     lRetVal = tls_connect();
     if(lRetVal < 0) {
         ERR_PRINT(lRetVal);

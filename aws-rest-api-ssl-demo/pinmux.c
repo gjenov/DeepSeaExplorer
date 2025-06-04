@@ -126,6 +126,7 @@ PinMuxConfig(void)
     //
     PinTypeI2C(PIN_02, PIN_MODE_1);
 
+    /*
     //
     // Configure PIN_61 for UART0 UART0_RTS
     //
@@ -146,11 +147,14 @@ PinMuxConfig(void)
     //
     MAP_PinTypeUART(PIN_57, PIN_MODE_3);
 
+*/
+    /*
+    //
     // Configure for UART 1 TX
     PinTypeUART(PIN_16, PIN_MODE_2);
 
     // Configure for UART 2 RX
     PinTypeUART(PIN_45, PIN_MODE_2);
-
+*/
 
 }
